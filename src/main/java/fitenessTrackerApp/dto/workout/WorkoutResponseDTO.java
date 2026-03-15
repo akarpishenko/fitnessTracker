@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class WorkoutResponseDTO {
     private int id;
-    private int userId;
+    private Long userId;
     private LocalDateTime start;
     private LocalDateTime finish;
     private double caloriesBurned;

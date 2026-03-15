@@ -4,16 +4,15 @@ import lombok.*;
 
 import java.util.List;
 
+@Data
 @Entity
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public int id;
+    private int id;
     public String name;
     public String lastName;
     public String email;

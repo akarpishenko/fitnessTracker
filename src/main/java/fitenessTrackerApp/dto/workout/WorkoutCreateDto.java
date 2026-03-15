@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class WorkoutDto {
+public class WorkoutCreateDto {
     @NotNull
     @Past
     private LocalDateTime start;
