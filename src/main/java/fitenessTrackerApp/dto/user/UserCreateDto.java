@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserCreateDto {
     @NotBlank
-    public String name;
+    private String name;
     @NotBlank
-    public String lastName;
+    private String lastName;
     @NotBlank
     @Email
-    public String email;
+    private String email;
     @NotBlank
-    public String username;
+    private String username;
 }

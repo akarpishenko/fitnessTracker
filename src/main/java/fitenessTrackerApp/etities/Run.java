@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "runs")
 public class Run {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

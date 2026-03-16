@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class UserUpdateDto {
-    public String name;
-    public String lastName;
-    public String email;
-    public String username;
+    private String name;
+    private String lastName;
+    private String email;
+    private String username;
 }

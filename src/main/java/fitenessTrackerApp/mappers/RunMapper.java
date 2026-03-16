@@ -6,10 +6,14 @@ import fitenessTrackerApp.etities.Run;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(uses = {UserMapper.class})
+import java.util.List;
+
+@Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface RunMapper {
     Run fromRunCreateDto(RunCreateDto runCreateDto);
 
     @Mapping(target = "userId", source = "user.id")
     RunResponseDTO toRunResponseDTO(Run run);
+
+    List<RunResponseDTO> toRunResponseDTOList(List<Run> runs);
 }
