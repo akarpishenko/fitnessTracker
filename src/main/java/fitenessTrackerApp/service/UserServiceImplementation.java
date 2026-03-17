@@ -3,6 +3,9 @@ package fitenessTrackerApp.service;
 import fitenessTrackerApp.dto.user.UserResponseDTO;
 import fitenessTrackerApp.dto.user.UserUpdateDto;
 import fitenessTrackerApp.etities.UserEntity;
+import fitenessTrackerApp.exception.EmailAlreadyInUseException;
+import fitenessTrackerApp.exception.UserNotFoundException;
+import fitenessTrackerApp.exception.UsernameAlreadyInUseException;
 import fitenessTrackerApp.mappers.UserMapper;
 import fitenessTrackerApp.repository.UserRepo;
 import jakarta.transaction.Transactional;
@@ -21,7 +24,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public UserResponseDTO getUserByUsername(String username) {
         return userMapper.toUserResponse(userRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username " + username)));
+                .orElseThrow(() -> new UserNotFoundException(username)));
     }
 
     @Override
@@ -32,19 +35,19 @@ public class UserServiceImplementation implements UserService {
     @Override
     public UserResponseDTO updateUser(String username, UserUpdateDto userUpdateDto) {
         UserEntity userEntity = userRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(username));
         if (userUpdateDto.getName() != null) userEntity.setName(userUpdateDto.getName());
         if (userUpdateDto.getLastName() != null) userEntity.setLastName(userUpdateDto.getLastName());
 
         if (userUpdateDto.getEmail() != null && !userUpdateDto.getEmail().isBlank()) {
             if (userRepo.existsByEmailAndUsernameNot(userUpdateDto.getEmail(), username))
-                throw new RuntimeException("Email already in use");
+                throw new EmailAlreadyInUseException(userUpdateDto.getEmail());
             userEntity.setEmail(userUpdateDto.getEmail());
         }
 
         if (userUpdateDto.getUsername() != null && !userUpdateDto.getUsername().isBlank()) {
             if (userRepo.existsByUsernameAndEmailNot(userUpdateDto.getUsername(), userUpdateDto.getEmail()))
-                throw new RuntimeException("Username already in use");
+                throw new UsernameAlreadyInUseException(userUpdateDto.getUsername());
             userEntity.setUsername(userUpdateDto.getUsername());
         }
 
@@ -53,7 +56,7 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public void deleteUser(String username) {
-        UserEntity user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         userRepo.deleteById(user.getId());
     }
 }

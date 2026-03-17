@@ -6,6 +6,8 @@ import fitenessTrackerApp.dto.user.UserLoginDto;
 import fitenessTrackerApp.dto.user.UserResponseDTO;
 import fitenessTrackerApp.etities.Role;
 import fitenessTrackerApp.etities.UserEntity;
+import fitenessTrackerApp.exception.EmailAlreadyInUseException;
+import fitenessTrackerApp.exception.UsernameAlreadyInUseException;
 import fitenessTrackerApp.mappers.UserMapper;
 import fitenessTrackerApp.repository.RoleRepo;
 import fitenessTrackerApp.repository.UserRepo;
@@ -51,7 +53,10 @@ public class AuthService implements UserDetailsService {
 
     public UserResponseDTO createUser(UserCreateDto userCreateDto) {
         if (userRepo.existsByUsername(userCreateDto.getUsername())) {
-            throw new RuntimeException("Username is taken");
+            throw new UsernameAlreadyInUseException(userCreateDto.getUsername());
+        }
+        if (userRepo.existsByEmail(userCreateDto.getEmail())) {
+            throw new EmailAlreadyInUseException(userCreateDto.getEmail());
         }
         UserEntity user = userMapper.fromUserCreateDto(userCreateDto);
         user.setPassword(passwordEncoder.encode(userCreateDto.getPassword()));
@@ -62,7 +67,7 @@ public class AuthService implements UserDetailsService {
 
     public AuthResponseDto login(UserLoginDto userLoginDto) {
         if (!userRepo.existsByUsername(userLoginDto.getUsername())) {
-            throw new RuntimeException("Username is not exists");
+            throw new UsernameNotFoundException(userLoginDto.getUsername());
         }
         AuthenticationManager authManager = context.getBean(AuthenticationManager.class);
         Authentication authentication = authManager.authenticate(

@@ -5,6 +5,9 @@ import fitenessTrackerApp.dto.workout.WorkoutResponseDTO;
 import fitenessTrackerApp.dto.workout.WorkoutUpdateDto;
 import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.etities.Workout;
+import fitenessTrackerApp.exception.UnauthorizedAccessException;
+import fitenessTrackerApp.exception.UserNotFoundException;
+import fitenessTrackerApp.exception.WorkoutNotFoundException;
 import fitenessTrackerApp.mappers.WorkoutMapper;
 import fitenessTrackerApp.repository.UserRepo;
 import fitenessTrackerApp.repository.WorkoutRepo;
@@ -25,14 +28,14 @@ public class WorkoutServiceImplementation implements WorkoutService {
     @Override
     public WorkoutResponseDTO createWorkout(String username, WorkoutCreateDto workoutCreateDto) {
         Workout workout = workoutMapper.fromWorkoutCreateDto(workoutCreateDto);
-        UserEntity userEntity = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username " + username));
+        UserEntity userEntity = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         workout.setUserEntity(userEntity);
         return workoutMapper.toWorkoutResponseDTO(workoutRepo.save(workout));
     }
 
     @Override
     public WorkoutResponseDTO getWorkoutById(long workoutId) {
-        return workoutMapper.toWorkoutResponseDTO(workoutRepo.findById(workoutId).orElseThrow(() -> new RuntimeException("Workout not found with id " + workoutId)));
+        return workoutMapper.toWorkoutResponseDTO(workoutRepo.findById(workoutId).orElseThrow(() -> new WorkoutNotFoundException(workoutId)));
     }
 
     @Override
@@ -43,10 +46,10 @@ public class WorkoutServiceImplementation implements WorkoutService {
 
     @Override
     public WorkoutResponseDTO updateWorkout(String username, long workoutId, WorkoutUpdateDto workoutUpdateDto) {
-        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new RuntimeException("Workout not found with id " + workoutId));
-        UserEntity userEntity = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username " + username));
+        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new WorkoutNotFoundException(workoutId));
+        userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         if (!username.equals(workout.getUserEntity().getUsername())) {
-            throw new RuntimeException("Workout user username- " + workout.getUserEntity().getUsername() + " and account username- " + username + " is not matching");
+            throw new UnauthorizedAccessException("Workout user username- " + workout.getUserEntity().getUsername() + " and account username- " + username + " is not matching");
         }
         if (workoutUpdateDto.getStart() != null) workout.setStart(workoutUpdateDto.getStart());
         if (workoutUpdateDto.getFinish() != null) workout.setFinish(workoutUpdateDto.getFinish());
@@ -56,10 +59,10 @@ public class WorkoutServiceImplementation implements WorkoutService {
 
     @Override
     public void deleteWorkout(long workoutId, String username) {
-        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new RuntimeException("Workout not found with id " + workoutId));
-        UserEntity userEntity = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username " + username));
+        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new WorkoutNotFoundException(workoutId));
+        userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         if (!username.equals(workout.getUserEntity().getUsername())) {
-            throw new RuntimeException("Workout user username- " + workout.getUserEntity().getUsername() + " and account username- " + username + " is not matching");
+            throw new UnauthorizedAccessException("Workout user username- " + workout.getUserEntity().getUsername() + " and account username- " + username + " is not matching");
         }
         workoutRepo.deleteById(workoutId);
     }

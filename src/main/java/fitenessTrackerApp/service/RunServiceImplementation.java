@@ -4,6 +4,9 @@ import fitenessTrackerApp.dto.run.RunCreateDto;
 import fitenessTrackerApp.dto.run.RunResponseDTO;
 import fitenessTrackerApp.dto.run.RunUpdateDto;
 import fitenessTrackerApp.etities.Run;
+import fitenessTrackerApp.exception.RunNotFoundException;
+import fitenessTrackerApp.exception.UnauthorizedAccessException;
+import fitenessTrackerApp.exception.UserNotFoundException;
 import fitenessTrackerApp.mappers.RunMapper;
 import fitenessTrackerApp.repository.RunRepo;
 import fitenessTrackerApp.repository.UserRepo;
@@ -25,7 +28,7 @@ public class RunServiceImplementation implements RunService {
     @Override
     public RunResponseDTO createRun(String username, RunCreateDto runCreateDto) {
         Run run = runMapper.fromRunCreateDto(runCreateDto);
-        run.setUserEntity(userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username " + username)));
+        run.setUserEntity(userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username)));
         run.setCaloriesBurned(calculateCalories(run));
 
         return runMapper.toRunResponseDTO(runRepo.save(run));
@@ -34,7 +37,7 @@ public class RunServiceImplementation implements RunService {
     @Override
     public RunResponseDTO getRunById(long id) {
 
-        return runMapper.toRunResponseDTO(runRepo.findById(id).orElseThrow(() -> new RuntimeException("Run not found with id " + id)));
+        return runMapper.toRunResponseDTO(runRepo.findById(id).orElseThrow(() -> new RunNotFoundException(id)));
     }
 
     @Override
@@ -44,18 +47,18 @@ public class RunServiceImplementation implements RunService {
 
     @Override
     public void deleteRun(long runId, String username) {
-        Run run = runRepo.findById(runId).orElseThrow(() -> new RuntimeException("Run not found with id " + runId));
+        Run run = runRepo.findById(runId).orElseThrow(() -> new RunNotFoundException(runId));
         if (!username.equals(run.getUserEntity().getUsername())) {
-            throw new RuntimeException("Run user username- " + run.getUserEntity().getUsername() + " and account username- " + username + " is not matching ");
+            throw new UnauthorizedAccessException("Run user username- " + run.getUserEntity().getUsername() + " and account username- " + username + " is not matching ");
         }
         runRepo.deleteById(runId);
     }
 
     @Override
     public RunResponseDTO updateRun(String username, long runId, RunUpdateDto runUpdateDto) {
-        Run run = runRepo.findById(runId).orElseThrow(() -> new RuntimeException("Run not found with id " + runId));
+        Run run = runRepo.findById(runId).orElseThrow(() -> new RunNotFoundException(runId));
         if (!username.equals(run.getUserEntity().getUsername())) {
-            throw new RuntimeException("Run user username- " + run.getUserEntity().getUsername() + " and account username- " + username + " is not matching ");
+            throw new UnauthorizedAccessException("Run user username- " + run.getUserEntity().getUsername() + " and account username- " + username + " is not matching ");
         }
         if (runUpdateDto.getStart() != null) run.setStart(runUpdateDto.getStart());
         if (runUpdateDto.getFinish() != null) run.setFinish(runUpdateDto.getFinish());

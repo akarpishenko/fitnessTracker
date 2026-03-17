@@ -5,6 +5,9 @@ import fitenessTrackerApp.dto.exercise.ExerciseResponseDTO;
 import fitenessTrackerApp.dto.exercise.ExerciseUpdateDto;
 import fitenessTrackerApp.etities.Exercise;
 import fitenessTrackerApp.etities.Workout;
+import fitenessTrackerApp.exception.ExerciseNotFoundException;
+import fitenessTrackerApp.exception.UnauthorizedAccessException;
+import fitenessTrackerApp.exception.WorkoutNotFoundException;
 import fitenessTrackerApp.mappers.ExerciseMapper;
 import fitenessTrackerApp.repository.ExerciseRepo;
 import fitenessTrackerApp.repository.WorkoutRepo;
@@ -28,7 +31,7 @@ public class ExerciseServiceImplementation implements ExerciseService {
     @Override
     public ExerciseResponseDTO createExercise(long workoutId, ExerciseCreateDto exerciseCreateDto) {
         Exercise exercise = exerciseMapper.fromExerciseCreateDto(exerciseCreateDto);
-        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new RuntimeException("Workout not found with id " + workoutId));
+        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new WorkoutNotFoundException(workoutId));
         exercise.setWorkout(workout);
         workout.setCaloriesBurned(workout.getCaloriesBurned() + calculateCalories(exercise));
         return exerciseMapper.toExerciseResponseDTO(exerciseRepo.save(exercise));
@@ -36,7 +39,7 @@ public class ExerciseServiceImplementation implements ExerciseService {
 
     @Override
     public ExerciseResponseDTO getExerciseById(long exerciseId) {
-        return exerciseMapper.toExerciseResponseDTO(exerciseRepo.findById(exerciseId).orElseThrow(() -> new RuntimeException("Exercise not found with id " + exerciseId)));
+        return exerciseMapper.toExerciseResponseDTO(exerciseRepo.findById(exerciseId).orElseThrow(() -> new ExerciseNotFoundException(exerciseId)));
     }
 
     @Override
@@ -46,10 +49,10 @@ public class ExerciseServiceImplementation implements ExerciseService {
 
     @Override
     public ExerciseResponseDTO updateExercise(long exerciseId, ExerciseUpdateDto exerciseUpdateDto, long workoutId) {
-        Exercise exercise = exerciseRepo.findById(exerciseId).orElseThrow(() -> new RuntimeException("Exercise not found with id " + exerciseId));
-        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new RuntimeException("Workout not found with id " + workoutId));
+        Exercise exercise = exerciseRepo.findById(exerciseId).orElseThrow(() -> new ExerciseNotFoundException(exerciseId));
+        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new WorkoutNotFoundException(workoutId));
         if (exercise.getWorkout().getId() != workoutId) {
-            throw new RuntimeException("Workout id- " + workoutId + " and exercise workout id- " + exercise.getWorkout().getId() + " is not matching");
+            throw new UnauthorizedAccessException("Workout id- " + workoutId + " and exercise workout id- " + exercise.getWorkout().getId() + " is not matching");
         }
         workout.setCaloriesBurned(workout.getCaloriesBurned() - calculateCalories(exercise));
         if (exerciseUpdateDto.getName() != null) exercise.setName(exerciseUpdateDto.getName());
@@ -61,10 +64,10 @@ public class ExerciseServiceImplementation implements ExerciseService {
 
     @Override
     public void deleteExercise(long exerciseId, long workoutId) {
-        Exercise exercise = exerciseRepo.findById(exerciseId).orElseThrow(() -> new RuntimeException("Exercise not found with id " + exerciseId));
-        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new RuntimeException("Workout not found with id " + workoutId));
+        Exercise exercise = exerciseRepo.findById(exerciseId).orElseThrow(() -> new ExerciseNotFoundException(exerciseId));
+        Workout workout = workoutRepo.findById(workoutId).orElseThrow(() -> new WorkoutNotFoundException(workoutId));
         if (exercise.getWorkout().getId() != workoutId) {
-            throw new RuntimeException("Workout id- " + workoutId + " and exercise workout id- " + exercise.getWorkout().getId() + " is not matching");
+            throw new UnauthorizedAccessException("Workout id- " + workoutId + " and exercise workout id- " + exercise.getWorkout().getId() + " is not matching");
         }
         workout.setCaloriesBurned(workout.getCaloriesBurned() - calculateCalories(exercise));
         exerciseRepo.deleteById(exerciseId);
