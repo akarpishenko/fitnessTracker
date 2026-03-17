@@ -2,7 +2,7 @@ package mappersTest;
 
 import fitenessTrackerApp.dto.user.UserCreateDto;
 import fitenessTrackerApp.dto.user.UserResponseDTO;
-import fitenessTrackerApp.etities.User;
+import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.etities.Workout;
 import fitenessTrackerApp.mappers.UserMapper;
 import fitenessTrackerApp.mappers.WorkoutMapper;
@@ -16,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class UserMapperTest {
+public class UserEntityMapperTest {
     private UserMapper userMapper;
     private WorkoutMapper workoutMapper;
 
@@ -30,7 +30,7 @@ public class UserMapperTest {
     public void testToUserResponse() {
         LocalDateTime start = LocalDateTime.now().minusHours(10);
         LocalDateTime finish = LocalDateTime.now().minusHours(9);
-        User user = User.builder()
+        UserEntity userEntity = UserEntity.builder()
                 .id(1)
                 .name("Anna")
                 .lastName("Orange")
@@ -41,11 +41,11 @@ public class UserMapperTest {
                 .id(1)
                 .start(start)
                 .finish(finish)
-                .user(user)
+                .userEntity(userEntity)
                 .caloriesBurned(100)
                 .build();
-        user.setWorkouts(List.of(workout));
-        UserResponseDTO userResponseDTO = userMapper.toUserResponse(user);
+        userEntity.setWorkouts(List.of(workout));
+        UserResponseDTO userResponseDTO = userMapper.toUserResponse(userEntity);
         assertNotNull(userResponseDTO);
         assertEquals("Anna", userResponseDTO.getName());
         assertEquals("Orange", userResponseDTO.getLastName());
@@ -62,11 +62,11 @@ public class UserMapperTest {
                 .username("aor")
                 .build();
 
-        User user = userMapper.fromUserCreateDto(userCreateDto);
-        assertNotNull(user);
-        assertEquals("Anna", user.getName());
-        assertEquals("Orange", user.getLastName());
-        assertEquals("aor@gmail.com", user.getEmail());
-        assertEquals("aor", user.getUsername());
+        UserEntity userEntity = userMapper.fromUserCreateDto(userCreateDto);
+        assertNotNull(userEntity);
+        assertEquals("Anna", userEntity.getName());
+        assertEquals("Orange", userEntity.getLastName());
+        assertEquals("aor@gmail.com", userEntity.getEmail());
+        assertEquals("aor", userEntity.getUsername());
     }
 }

@@ -7,13 +7,13 @@ import fitenessTrackerApp.dto.run.RunUpdateDto;
 import java.util.List;
 
 public interface RunService {
-    RunResponseDTO createRun(long userId, RunCreateDto runCreateDto);
+    RunResponseDTO createRun(String username, RunCreateDto runCreateDto);
 
     RunResponseDTO getRunById(long id);
 
-    List<RunResponseDTO> getRunsByUser(long userId);
+    List<RunResponseDTO> getRunsByUser(String username);
 
-    void deleteRun(long runId, long userId);
+    void deleteRun(long runId, String username);
 
-    RunResponseDTO updateRun(long userId, long runId, RunUpdateDto runUpdateDto);
+    RunResponseDTO updateRun(String username, long runId, RunUpdateDto runUpdateDto);
 }

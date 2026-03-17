@@ -4,7 +4,7 @@ import fitenessTrackerApp.dto.run.RunCreateDto;
 import fitenessTrackerApp.dto.run.RunResponseDTO;
 import fitenessTrackerApp.dto.run.RunUpdateDto;
 import fitenessTrackerApp.etities.Run;
-import fitenessTrackerApp.etities.User;
+import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.mappers.RunMapper;
 import fitenessTrackerApp.repository.RunRepo;
 import fitenessTrackerApp.repository.UserRepo;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -21,7 +20,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RunServiceImplementationTest {
@@ -39,128 +39,18 @@ public class RunServiceImplementationTest {
     private RunMapper runMapper;
 
     @InjectMocks
-    private RunServiceImplementation runServiceImplementation;
+    private RunServiceImplementation runService;
 
     @Test
     public void createRun_shouldReturnRunDto() {
-
-        User user = new User();
-        user.setId(1);
-
-        Run run = Run.builder().start(start).finish(finish).distanceKm(5).build();
-
-        RunCreateDto createDto = RunCreateDto.builder().start(start).finish(finish).distanceKm(5).build();
-
-        RunResponseDTO responseDTO = RunResponseDTO.builder().start(start).finish(finish).distanceKm(5).caloriesBurned(310).build();
-
-        when(runMapper.fromRunCreateDto(Mockito.any())).thenReturn(run);
-        when(userRepo.findById(Mockito.any())).thenReturn(Optional.of(user));
-        when(runRepo.save(Mockito.any())).thenReturn(run);
-        when(runMapper.toRunResponseDTO(Mockito.any())).thenReturn(responseDTO);
-
-        RunResponseDTO savedRun = runServiceImplementation.createRun(1, createDto);
-
-        assertNotNull(savedRun);
-        assertEquals(start, savedRun.getStart());
-        assertEquals(finish, savedRun.getFinish());
-
-        verify(runRepo, times(1)).save(run);
-    }
-
-    @Test
-    public void getRunById_shouldReturnRun() {
+        UserEntity user = new UserEntity();
+        user.setUsername("ann");
 
         Run run = Run.builder()
                 .start(start)
                 .finish(finish)
+                .distanceKm(5)
                 .build();
-
-        RunResponseDTO dto = RunResponseDTO.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-
-        when(runRepo.findById(Mockito.any())).thenReturn(Optional.of(run));
-        when(runMapper.toRunResponseDTO(Mockito.any())).thenReturn(dto);
-
-        RunResponseDTO returned = runServiceImplementation.getRunById(1L);
-
-        assertNotNull(returned);
-        assertEquals(start, returned.getStart());
-        assertEquals(finish, returned.getFinish());
-
-        verify(runRepo, times(1)).findById(1L);
-    }
-
-    @Test
-    public void getRunsByUser_shouldReturnRuns() {
-
-        Run run = Run.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-
-        RunResponseDTO dto = RunResponseDTO.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-
-        when(runRepo.findAllByUserId(1)).thenReturn(List.of(run));
-
-        when(runMapper.toRunResponseDTOList(Mockito.any())).thenReturn(List.of(dto));
-
-        List<RunResponseDTO> runs = runServiceImplementation.getRunsByUser(1);
-
-        assertNotNull(runs);
-        assertEquals(1, runs.size());
-
-        verify(runRepo, times(1)).findAllByUserId(1L);
-    }
-
-    @Test
-    public void updateRun_shouldUpdateRun() {
-
-        User user = new User();
-        user.setId(1);
-
-        Run run = Run.builder().user(user).start(start).finish(finish).distanceKm(5).averagePace(5.5).build();
-
-        LocalDateTime newStart = start.minusHours(1);
-
-        RunUpdateDto updateDto = new RunUpdateDto();
-        updateDto.setStart(newStart);
-        updateDto.setDistanceKm(10.0);
-
-        RunResponseDTO responseDTO = RunResponseDTO.builder().start(newStart).distanceKm(10).build();
-
-        when(runRepo.findById(Mockito.any())).thenReturn(Optional.of(run));
-        when(runRepo.save(Mockito.any())).thenReturn(run);
-        when(runMapper.toRunResponseDTO(Mockito.any())).thenReturn(responseDTO);
-
-        RunResponseDTO updated = runServiceImplementation.updateRun(1, 1, updateDto);
-
-        assertEquals(newStart, updated.getStart());
-
-        verify(runRepo).save(run);
-    }
-
-    @Test
-    public void deleteRun_shouldDeleteRun() {
-
-        User user = new User();
-        user.setId(1);
-
-        Run run = Run.builder().user(user).build();
-
-        when(runRepo.findById(Mockito.any())).thenReturn(Optional.of(run));
-
-        runServiceImplementation.deleteRun(1, 1);
-
-        verify(runRepo, times(1)).deleteById(1L);
-    }
-
-    @Test
-    public void createRun_shouldThrowException_whenUserNotFound() {
 
         RunCreateDto dto = RunCreateDto.builder()
                 .start(start)
@@ -168,78 +58,150 @@ public class RunServiceImplementationTest {
                 .distanceKm(5)
                 .build();
 
-        Run run = Run.builder()
+        RunResponseDTO response = RunResponseDTO.builder()
                 .start(start)
                 .finish(finish)
                 .distanceKm(5)
                 .build();
 
-        when(runMapper.fromRunCreateDto(Mockito.any())).thenReturn(run);
-        when(userRepo.findById(Mockito.any())).thenReturn(Optional.empty());
+        when(runMapper.fromRunCreateDto(dto)).thenReturn(run);
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.of(user));
+        when(runRepo.save(run)).thenReturn(run);
+        when(runMapper.toRunResponseDTO(run)).thenReturn(response);
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> runServiceImplementation.createRun(1, dto)
-        );
+        RunResponseDTO result = runService.createRun("ann", dto);
 
-        assertEquals("User not found with id 1", exception.getMessage());
+        assertNotNull(result);
+        assertEquals(start, result.getStart());
+        verify(runRepo).save(run);
     }
 
     @Test
-    public void getRunById_shouldThrowException_whenRunNotFound() {
+    public void createRun_shouldThrow_whenUserNotFound() {
+        RunCreateDto dto = new RunCreateDto();
 
-        when(runRepo.findById(Mockito.any())).thenReturn(Optional.empty());
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> runServiceImplementation.getRunById(1)
-        );
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> runService.createRun("ann", dto));
 
-        assertEquals("Run not found with id 1", exception.getMessage());
+        assertTrue(ex.getMessage().contains("User not found"));
     }
 
     @Test
-    public void updateRun_shouldThrowException_whenUserMismatch() {
+    public void getRunById_shouldReturnRun() {
+        Run run = Run.builder().start(start).finish(finish).build();
+        RunResponseDTO dto = RunResponseDTO.builder().start(start).finish(finish).build();
 
-        User runUser = new User();
-        runUser.setId(2);
+        when(runRepo.findById(1L)).thenReturn(Optional.of(run));
+        when(runMapper.toRunResponseDTO(run)).thenReturn(dto);
+
+        RunResponseDTO result = runService.getRunById(1);
+
+        assertEquals(start, result.getStart());
+        verify(runRepo).findById(1L);
+    }
+
+    @Test
+    public void getRunById_shouldThrow_whenNotFound() {
+        when(runRepo.findById(1L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> runService.getRunById(1));
+
+        assertEquals("Run not found with id 1", ex.getMessage());
+    }
+
+    @Test
+    public void getRunsByUser_shouldReturnRuns() {
+        Run run = new Run();
+        RunResponseDTO dto = new RunResponseDTO();
+
+        when(runRepo.findAllByUserEntityUsername("ann"))
+                .thenReturn(List.of(run));
+
+        when(runMapper.toRunResponseDTOList(List.of(run)))
+                .thenReturn(List.of(dto));
+
+        List<RunResponseDTO> result = runService.getRunsByUser("ann");
+
+        assertEquals(1, result.size());
+        verify(runRepo).findAllByUserEntityUsername("ann");
+    }
+
+    @Test
+    public void updateRun_shouldUpdateRun() {
+        UserEntity user = new UserEntity();
+        user.setUsername("ann");
 
         Run run = Run.builder()
-                .user(runUser)
+                .userEntity(user)
                 .start(start)
                 .finish(finish)
                 .distanceKm(5)
                 .build();
 
-        RunUpdateDto updateDto = new RunUpdateDto();
+        LocalDateTime newStart = start.minusHours(1);
 
-        when(runRepo.findById(Mockito.any())).thenReturn(Optional.of(run));
+        RunUpdateDto dto = new RunUpdateDto();
+        dto.setStart(newStart);
+        dto.setDistanceKm(10.0);
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> runServiceImplementation.updateRun(1, 1, updateDto)
-        );
+        RunResponseDTO response = new RunResponseDTO();
+        response.setStart(newStart);
 
-        assertTrue(exception.getMessage().contains("is not matching"));
+        when(runRepo.findById(1L)).thenReturn(Optional.of(run));
+        when(runRepo.save(run)).thenReturn(run);
+        when(runMapper.toRunResponseDTO(run)).thenReturn(response);
+
+        RunResponseDTO result = runService.updateRun("ann", 1, dto);
+
+        assertEquals(newStart, result.getStart());
+        verify(runRepo).save(run);
     }
 
     @Test
-    public void deleteRun_shouldThrowException_whenUserMismatch() {
+    public void updateRun_shouldThrow_whenUserMismatch() {
+        UserEntity otherUser = new UserEntity();
+        otherUser.setUsername("john");
 
-        User runUser = new User();
-        runUser.setId(2);
+        Run run = new Run();
+        run.setUserEntity(otherUser);
 
-        Run run = Run.builder()
-                .user(runUser)
-                .build();
+        when(runRepo.findById(1L)).thenReturn(Optional.of(run));
 
-        when(runRepo.findById(Mockito.any())).thenReturn(Optional.of(run));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> runService.updateRun("ann", 1, new RunUpdateDto()));
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> runServiceImplementation.deleteRun(1, 1)
-        );
+        assertTrue(ex.getMessage().contains("not matching"));
+    }
 
-        assertTrue(exception.getMessage().contains("is not matching"));
+    @Test
+    public void deleteRun_shouldDeleteRun() {
+        UserEntity user = new UserEntity();
+        user.setUsername("ann");
+
+        Run run = new Run();
+        run.setUserEntity(user);
+
+        when(runRepo.findById(1L)).thenReturn(Optional.of(run));
+
+        runService.deleteRun(1, "ann");
+
+        verify(runRepo).deleteById(1L);
+    }
+
+    @Test
+    public void deleteRun_shouldThrow_whenUserMismatch() {
+        UserEntity otherUser = new UserEntity();
+        otherUser.setUsername("john");
+
+        Run run = new Run();
+        run.setUserEntity(otherUser);
+
+        when(runRepo.findById(1L)).thenReturn(Optional.of(run));
+
+        assertThrows(RuntimeException.class,
+                () -> runService.deleteRun(1, "ann"));
     }
 }

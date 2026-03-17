@@ -31,13 +31,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = FitnessTrackerApp.class)
 class ExerciseControllerTest {
 
-    private final long userId = 1L;
     private final long workoutId = 2L;
     private final long exerciseId = 3L;
+
     @Autowired
     private MockMvc mockMvc;
+
     @MockBean
     private ExerciseService exerciseService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -51,11 +53,10 @@ class ExerciseControllerTest {
         ExerciseResponseDTO response = new ExerciseResponseDTO();
         response.setName("Push Up");
         response.setReps(10);
-        response.setWeightKg(0.0);
 
         when(exerciseService.createExercise(eq(workoutId), any())).thenReturn(response);
 
-        mockMvc.perform(post("/users/{userId}/workouts/{workoutId}/exercises", userId, workoutId)
+        mockMvc.perform(post("/users/workouts/{workoutId}/exercises", workoutId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -73,7 +74,7 @@ class ExerciseControllerTest {
 
         when(exerciseService.getExerciseById(exerciseId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/{userId}/workouts/{workoutId}/exercises/{id}", userId, workoutId, exerciseId))
+        mockMvc.perform(get("/users/workouts/{workoutId}/exercises/{id}", workoutId, exerciseId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Squat"))
                 .andExpect(jsonPath("$.reps").value(15));
@@ -88,7 +89,7 @@ class ExerciseControllerTest {
 
         when(exerciseService.getExercisesByWorkout(workoutId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/users/{userId}/workouts/{workoutId}/exercises", userId, workoutId))
+        mockMvc.perform(get("/users/workouts/{workoutId}/exercises", workoutId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Sit Up"));
 
@@ -104,9 +105,10 @@ class ExerciseControllerTest {
         response.setName("Push Up");
         response.setReps(20);
 
-        when(exerciseService.updateExercise(eq(exerciseId), any(), eq(workoutId))).thenReturn(response);
+        when(exerciseService.updateExercise(eq(exerciseId), any(), eq(workoutId)))
+                .thenReturn(response);
 
-        mockMvc.perform(patch("/users/{userId}/workouts/{workoutId}/exercises/{id}", userId, workoutId, exerciseId)
+        mockMvc.perform(patch("/users/workouts/{workoutId}/exercises/{id}", workoutId, exerciseId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -117,7 +119,7 @@ class ExerciseControllerTest {
 
     @Test
     void deleteExercise_shouldCallService() throws Exception {
-        mockMvc.perform(delete("/users/{userId}/workouts/{workoutId}/exercises/{id}", userId, workoutId, exerciseId))
+        mockMvc.perform(delete("/users/workouts/{workoutId}/exercises/{id}", workoutId, exerciseId))
                 .andExpect(status().isOk());
 
         verify(exerciseService).deleteExercise(exerciseId, workoutId);

@@ -1,12 +1,18 @@
 package fitenessTrackerApp.repository;
 
-import fitenessTrackerApp.etities.User;
+import fitenessTrackerApp.etities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface UserRepo extends JpaRepository<User, Long> {
-    boolean existsByEmailAndIdNot(String email, Long id);
+import java.util.Optional;
 
-    boolean existsByUsernameAndIdNot(String username, Long id);
+@Repository
+public interface UserRepo extends JpaRepository<UserEntity, Long> {
+    boolean existsByEmailAndUsernameNot(String email, String username);
+
+    Optional<UserEntity> findByUsername(String username);
+
+    Boolean existsByUsername(String username);
+
+    boolean existsByUsernameAndEmailNot(String username, String email);
 }

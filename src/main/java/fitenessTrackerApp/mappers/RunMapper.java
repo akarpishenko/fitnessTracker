@@ -12,7 +12,7 @@ import java.util.List;
 public interface RunMapper {
     Run fromRunCreateDto(RunCreateDto runCreateDto);
 
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userId", source = "userEntity.id")
     RunResponseDTO toRunResponseDTO(Run run);
 
     List<RunResponseDTO> toRunResponseDTOList(List<Run> runs);

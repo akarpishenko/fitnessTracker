@@ -12,7 +12,7 @@ import java.util.List;
 public interface WorkoutMapper {
     Workout fromWorkoutCreateDto(WorkoutCreateDto workoutCreateDto);
 
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userId", source = "userEntity.id")
     WorkoutResponseDTO toWorkoutResponseDTO(Workout workout);
 
     List<WorkoutResponseDTO> toWorkoutResponseDTOList(List<Workout> workouts);

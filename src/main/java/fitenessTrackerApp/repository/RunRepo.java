@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface RunRepo extends JpaRepository<Run, Long> {
-    List<Run> findAllByUserId(long id);
+    List<Run> findAllByUserEntityUsername(String username);
 }

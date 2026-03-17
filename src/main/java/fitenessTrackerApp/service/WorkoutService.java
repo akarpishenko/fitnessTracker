@@ -7,13 +7,13 @@ import fitenessTrackerApp.dto.workout.WorkoutUpdateDto;
 import java.util.List;
 
 public interface WorkoutService {
-    WorkoutResponseDTO createWorkout(long userId, WorkoutCreateDto workoutCreateDto);
+    WorkoutResponseDTO createWorkout(String username, WorkoutCreateDto workoutCreateDto);
 
     WorkoutResponseDTO getWorkoutById(long workoutId);
 
-    List<WorkoutResponseDTO> getWorkoutsByUser(long userId);
+    List<WorkoutResponseDTO> getWorkoutsByUser(String username);
 
-    WorkoutResponseDTO updateWorkout(long userId, long workoutId, WorkoutUpdateDto workoutUpdateDto);
+    WorkoutResponseDTO updateWorkout(String username, long workoutId, WorkoutUpdateDto workoutUpdateDto);
 
-    void deleteWorkout(long workoutId, long userId);
+    void deleteWorkout(long workoutId, String username);
 }

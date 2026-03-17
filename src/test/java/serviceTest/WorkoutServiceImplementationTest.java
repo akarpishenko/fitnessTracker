@@ -2,7 +2,8 @@ package serviceTest;
 
 import fitenessTrackerApp.dto.workout.WorkoutCreateDto;
 import fitenessTrackerApp.dto.workout.WorkoutResponseDTO;
-import fitenessTrackerApp.etities.User;
+import fitenessTrackerApp.dto.workout.WorkoutUpdateDto;
+import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.etities.Workout;
 import fitenessTrackerApp.mappers.WorkoutMapper;
 import fitenessTrackerApp.repository.UserRepo;
@@ -12,208 +13,185 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class WorkoutServiceImplementationTest {
+
     private final LocalDateTime start = LocalDateTime.now().minusHours(10);
     private final LocalDateTime finish = LocalDateTime.now().minusHours(9);
+
     @Mock
     private WorkoutRepo workoutRepo;
+
     @Mock
     private WorkoutMapper workoutMapper;
+
     @Mock
     private UserRepo userRepo;
+
     @InjectMocks
-    private WorkoutServiceImplementation workoutServiceImplementation;
+    private WorkoutServiceImplementation workoutService;
 
     @Test
-    public void createWorkout_ReturnWorkoutDto() {
-        Workout workout = Workout.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-        WorkoutCreateDto workoutCreateDto = WorkoutCreateDto.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-        WorkoutResponseDTO workoutResponseDTO = WorkoutResponseDTO.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-        User user = new User();
-        when(workoutMapper.fromWorkoutCreateDto(Mockito.any())).thenReturn(workout);
-        when(userRepo.findById(Mockito.any())).thenReturn(Optional.of(user));
-        when(workoutRepo.save(Mockito.any())).thenReturn(workout);
-        when(workoutMapper.toWorkoutResponseDTO(Mockito.any())).thenReturn(workoutResponseDTO);
-        WorkoutResponseDTO savedWorkout = workoutServiceImplementation.createWorkout(1, workoutCreateDto);
-        assertNotNull(savedWorkout);
-        assertEquals(start, savedWorkout.getStart());
-        assertEquals(finish, savedWorkout.getFinish());
-        verify(workoutRepo, times(1)).save(workout);
-
-    }
-
-    @Test
-    public void getWorkoutById_shouldReturnWorkout() {
-        Workout workout = Workout.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-        WorkoutResponseDTO workoutResponseDTO = WorkoutResponseDTO.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-        when(workoutRepo.findById(Mockito.any())).thenReturn(Optional.of(workout));
-        when(workoutMapper.toWorkoutResponseDTO(Mockito.any())).thenReturn(workoutResponseDTO);
-        WorkoutResponseDTO returned = workoutServiceImplementation.getWorkoutById(1);
-        assertNotNull(returned);
-        assertEquals(start, returned.getStart());
-        assertEquals(finish, returned.getFinish());
-        verify(workoutRepo, times(1)).findById(1L);
-
-    }
-
-    @Test
-    public void getWorkoutsByUser_shouldReturnList() {
-
-        Workout workout = Workout.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-
-        WorkoutResponseDTO dto = WorkoutResponseDTO.builder()
-                .start(start)
-                .finish(finish)
-                .build();
-
-        when(workoutRepo.findAllByUserId(Mockito.anyLong()))
-                .thenReturn(java.util.List.of(workout));
-
-        when(workoutMapper.toWorkoutResponseDTOList(Mockito.any()))
-                .thenReturn(java.util.List.of(dto));
-
-        var result = workoutServiceImplementation.getWorkoutsByUser(1);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(start, result.get(0).getStart());
-
-        verify(workoutRepo, times(1)).findAllByUserId(1L);
-    }
-
-    @Test
-    public void updateWorkout_shouldUpdateStartAndFinish() {
-
-        User user = new User();
-        user.setId(1);
-
-        Workout workout = Workout.builder()
-                .start(start)
-                .finish(finish)
-                .user(user)
-                .build();
-
-        LocalDateTime newStart = start.minusHours(1);
-        LocalDateTime newFinish = finish.minusHours(1);
-
-        var updateDto = new fitenessTrackerApp.dto.workout.WorkoutUpdateDto();
-        updateDto.setStart(newStart);
-        updateDto.setFinish(newFinish);
-
-        WorkoutResponseDTO responseDTO = WorkoutResponseDTO.builder()
-                .start(newStart)
-                .finish(newFinish)
-                .build();
-
-        when(workoutRepo.findById(Mockito.any())).thenReturn(Optional.of(workout));
-        when(userRepo.findById(Mockito.any())).thenReturn(Optional.of(user));
-        when(workoutRepo.save(Mockito.any())).thenReturn(workout);
-        when(workoutMapper.toWorkoutResponseDTO(Mockito.any())).thenReturn(responseDTO);
-
-        WorkoutResponseDTO updated =
-                workoutServiceImplementation.updateWorkout(1, 1, updateDto);
-
-        assertEquals(newStart, updated.getStart());
-        assertEquals(newFinish, updated.getFinish());
-
-        verify(workoutRepo).save(workout);
-    }
-
-    @Test
-    public void deleteWorkout_shouldDeleteWorkout() {
-
-        User user = new User();
-        user.setId(1);
-
-        Workout workout = Workout.builder()
-                .user(user)
-                .build();
-
-        when(workoutRepo.findById(Mockito.any()))
-                .thenReturn(Optional.of(workout));
-
-        when(userRepo.findById(Mockito.any()))
-                .thenReturn(Optional.of(user));
-
-        workoutServiceImplementation.deleteWorkout(1, 1);
-
-        verify(workoutRepo, times(1)).deleteById(1L);
-    }
-
-    @Test
-    public void createWorkout_shouldThrowIfUserNotFound() {
+    public void createWorkout_shouldReturnDto() {
+        Workout workout = Workout.builder().start(start).finish(finish).build();
 
         WorkoutCreateDto dto = WorkoutCreateDto.builder()
                 .start(start)
                 .finish(finish)
                 .build();
 
-        when(userRepo.findById(Mockito.any()))
-                .thenReturn(Optional.empty());
+        WorkoutResponseDTO response = WorkoutResponseDTO.builder()
+                .start(start)
+                .finish(finish)
+                .build();
 
-        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                RuntimeException.class,
-                () -> workoutServiceImplementation.createWorkout(1, dto)
-        );
+        UserEntity user = new UserEntity();
+        user.setUsername("ann");
 
-        assertEquals("User not found with id 1", exception.getMessage());
+        when(workoutMapper.fromWorkoutCreateDto(dto)).thenReturn(workout);
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.of(user));
+        when(workoutRepo.save(workout)).thenReturn(workout);
+        when(workoutMapper.toWorkoutResponseDTO(workout)).thenReturn(response);
+
+        WorkoutResponseDTO result = workoutService.createWorkout("ann", dto);
+
+        assertNotNull(result);
+        assertEquals(start, result.getStart());
+        verify(workoutRepo).save(workout);
     }
 
     @Test
-    public void updateWorkout_shouldThrowIfUserMismatch() {
+    public void createWorkout_shouldThrow_whenUserNotFound() {
+        WorkoutCreateDto dto = WorkoutCreateDto.builder().build();
 
-        User workoutUser = new User();
-        workoutUser.setId(2);
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> workoutService.createWorkout("ann", dto));
+
+        assertTrue(ex.getMessage().contains("User not found"));
+    }
+
+    @Test
+    public void getWorkoutById_shouldReturnWorkout() {
+        Workout workout = Workout.builder().start(start).finish(finish).build();
+        WorkoutResponseDTO dto = WorkoutResponseDTO.builder().start(start).finish(finish).build();
+
+        when(workoutRepo.findById(1L)).thenReturn(Optional.of(workout));
+        when(workoutMapper.toWorkoutResponseDTO(workout)).thenReturn(dto);
+
+        WorkoutResponseDTO result = workoutService.getWorkoutById(1);
+
+        assertEquals(start, result.getStart());
+        verify(workoutRepo).findById(1L);
+    }
+
+    @Test
+    public void getWorkoutsByUser_shouldReturnList() {
+        Workout workout = new Workout();
+        WorkoutResponseDTO dto = new WorkoutResponseDTO();
+
+        when(workoutRepo.findAllByUserEntityUsername("ann"))
+                .thenReturn(List.of(workout));
+
+        when(workoutMapper.toWorkoutResponseDTOList(List.of(workout)))
+                .thenReturn(List.of(dto));
+
+        var result = workoutService.getWorkoutsByUser("ann");
+
+        assertEquals(1, result.size());
+        verify(workoutRepo).findAllByUserEntityUsername("ann");
+    }
+
+    @Test
+    public void updateWorkout_shouldUpdateFields() {
+        UserEntity user = new UserEntity();
+        user.setUsername("ann");
 
         Workout workout = Workout.builder()
-                .user(workoutUser)
+                .start(start)
+                .finish(finish)
+                .userEntity(user)
                 .build();
 
-        User requestUser = new User();
-        requestUser.setId(1);
+        LocalDateTime newStart = start.minusHours(1);
+        LocalDateTime newFinish = finish.minusHours(1);
 
-        var updateDto = new fitenessTrackerApp.dto.workout.WorkoutUpdateDto();
+        WorkoutUpdateDto dto = new WorkoutUpdateDto();
+        dto.setStart(newStart);
+        dto.setFinish(newFinish);
 
-        when(workoutRepo.findById(Mockito.any()))
-                .thenReturn(Optional.of(workout));
+        WorkoutResponseDTO response = WorkoutResponseDTO.builder()
+                .start(newStart)
+                .finish(newFinish)
+                .build();
 
-        when(userRepo.findById(Mockito.any()))
-                .thenReturn(Optional.of(requestUser));
+        when(workoutRepo.findById(1L)).thenReturn(Optional.of(workout));
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.of(user));
+        when(workoutRepo.save(workout)).thenReturn(workout);
+        when(workoutMapper.toWorkoutResponseDTO(workout)).thenReturn(response);
 
-        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                RuntimeException.class,
-                () -> workoutServiceImplementation.updateWorkout(1, 1, updateDto)
-        );
+        WorkoutResponseDTO result = workoutService.updateWorkout("ann", 1, dto);
 
-        assertNotNull(exception);
+        assertEquals(newStart, result.getStart());
+        verify(workoutRepo).save(workout);
+    }
+
+    @Test
+    public void updateWorkout_shouldThrow_whenUserMismatch() {
+        UserEntity workoutUser = new UserEntity();
+        workoutUser.setUsername("john");
+
+        Workout workout = new Workout();
+        workout.setUserEntity(workoutUser);
+
+        when(workoutRepo.findById(1L)).thenReturn(Optional.of(workout));
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.of(new UserEntity()));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> workoutService.updateWorkout("ann", 1, new WorkoutUpdateDto()));
+
+        assertTrue(ex.getMessage().contains("not matching"));
+    }
+
+    @Test
+    public void deleteWorkout_shouldDelete() {
+        UserEntity user = new UserEntity();
+        user.setUsername("ann");
+
+        Workout workout = new Workout();
+        workout.setUserEntity(user);
+
+        when(workoutRepo.findById(1L)).thenReturn(Optional.of(workout));
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.of(user));
+
+        workoutService.deleteWorkout(1, "ann");
+
+        verify(workoutRepo).deleteById(1L);
+    }
+
+    @Test
+    public void deleteWorkout_shouldThrow_whenMismatch() {
+        UserEntity workoutUser = new UserEntity();
+        workoutUser.setUsername("john");
+
+        Workout workout = new Workout();
+        workout.setUserEntity(workoutUser);
+
+        when(workoutRepo.findById(1L)).thenReturn(Optional.of(workout));
+        when(userRepo.findByUsername("ann")).thenReturn(Optional.of(new UserEntity()));
+
+        assertThrows(RuntimeException.class,
+                () -> workoutService.deleteWorkout(1, "ann"));
     }
 }

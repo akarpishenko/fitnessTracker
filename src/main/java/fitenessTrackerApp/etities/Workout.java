@@ -22,7 +22,7 @@ public class Workout {
     private LocalDateTime start;
     private LocalDateTime finish;
     @ManyToOne
-    private User user;
+    private UserEntity userEntity;
     private double caloriesBurned;
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Exercise> exercises;

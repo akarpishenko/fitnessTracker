@@ -2,7 +2,7 @@ package mappersTest;
 
 import fitenessTrackerApp.dto.workout.WorkoutCreateDto;
 import fitenessTrackerApp.dto.workout.WorkoutResponseDTO;
-import fitenessTrackerApp.etities.User;
+import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.etities.Workout;
 import fitenessTrackerApp.mappers.WorkoutMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,13 +37,13 @@ public class WorkoutMapperTest {
 
     @Test
     public void testToWorkoutResponseDTO() {
-        User user = new User();
-        user.setId(1);
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(1);
         Workout workout = Workout.builder()
                 .id(1)
                 .start(start)
                 .finish(finish)
-                .user(user)
+                .userEntity(userEntity)
                 .caloriesBurned(100)
                 .build();
         WorkoutResponseDTO workoutResponseDTO = workoutMapper.toWorkoutResponseDTO(workout);

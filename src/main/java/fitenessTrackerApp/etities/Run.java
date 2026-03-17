@@ -19,7 +19,7 @@ public class Run {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToOne
-    private User user;
+    private UserEntity userEntity;
     private LocalDateTime start;
     private LocalDateTime finish;
     private double distanceKm;

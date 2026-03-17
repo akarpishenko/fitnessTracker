@@ -3,7 +3,7 @@ package mappersTest;
 import fitenessTrackerApp.dto.run.RunCreateDto;
 import fitenessTrackerApp.dto.run.RunResponseDTO;
 import fitenessTrackerApp.etities.Run;
-import fitenessTrackerApp.etities.User;
+import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.mappers.RunMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +44,11 @@ public class RunMapperTest {
 
     @Test
     public void testToRunResponseDTO() {
-        User user = new User();
-        user.setId(1);
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(1);
         Run run = Run.builder()
                 .id(1)
-                .user(user)
+                .userEntity(userEntity)
                 .start(start)
                 .finish(finish)
                 .distanceKm(12)

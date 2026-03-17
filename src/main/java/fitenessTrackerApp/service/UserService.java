@@ -1,19 +1,17 @@
 package fitenessTrackerApp.service;
 
-import fitenessTrackerApp.dto.user.UserCreateDto;
 import fitenessTrackerApp.dto.user.UserResponseDTO;
 import fitenessTrackerApp.dto.user.UserUpdateDto;
 
 import java.util.List;
 
 public interface UserService {
-    UserResponseDTO createUser(UserCreateDto userCreateDto);
 
-    UserResponseDTO getUserById(long userId);
+    UserResponseDTO getUserByUsername(String username);
 
     List<UserResponseDTO> getAllUsers();
 
-    UserResponseDTO updateUser(long userId, UserUpdateDto userUpdateDto);
+    UserResponseDTO updateUser(String username, UserUpdateDto userUpdateDto);
 
-    void deleteUser(long userId);
+    void deleteUser(String username);
 }
