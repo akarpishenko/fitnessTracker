@@ -1,6 +1,8 @@
-package fitenessTrackerApp.etities;
+package fitenessTrackerApp.dto.run;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,21 +10,19 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Table(name = "runs")
-public class Run {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @ManyToOne
-    private UserEntity userEntity;
+public class RunCreateDto {
+    @NotNull
+    @Past
     private LocalDateTime start;
+    @Past
+    @NotNull
     private LocalDateTime finish;
+    @Positive
     private double distanceKm;
+    @Positive
     private double averagePace;
-    private double caloriesBurned;
 }

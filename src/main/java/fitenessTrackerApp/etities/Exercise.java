@@ -1,4 +1,5 @@
 package fitenessTrackerApp.etities;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,10 +9,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "exercises")
 public class Exercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public int id;
+    private int id;
     private String name;
     private int reps;
     private double weightKg;
