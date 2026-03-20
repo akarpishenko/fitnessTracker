@@ -60,7 +60,8 @@ public class AuthService implements UserDetailsService {
         }
         UserEntity user = userMapper.fromUserCreateDto(userCreateDto);
         user.setPassword(passwordEncoder.encode(userCreateDto.getPassword()));
-        Role roles = roleRepo.findByName("USER").get();
+        Role roles = roleRepo.findByName("USER")
+                .orElseGet(() -> roleRepo.save(new Role(0, "USER")));
         user.setRoles(Collections.singletonList(roles));
         return userMapper.toUserResponse(userRepo.save(user));
     }

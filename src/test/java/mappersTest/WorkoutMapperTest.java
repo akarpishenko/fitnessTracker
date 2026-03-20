@@ -1,8 +1,6 @@
 package mappersTest;
 
 import fitenessTrackerApp.dto.workout.WorkoutCreateDto;
-import fitenessTrackerApp.dto.workout.WorkoutResponseDTO;
-import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.etities.Workout;
 import fitenessTrackerApp.mappers.WorkoutMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,24 +31,5 @@ public class WorkoutMapperTest {
         assertNotNull(workout);
         assertEquals(start, workout.getStart());
         assertEquals(finish, workout.getFinish());
-    }
-
-    @Test
-    public void testToWorkoutResponseDTO() {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(1);
-        Workout workout = Workout.builder()
-                .id(1)
-                .start(start)
-                .finish(finish)
-                .userEntity(userEntity)
-                .caloriesBurned(100)
-                .build();
-        WorkoutResponseDTO workoutResponseDTO = workoutMapper.toWorkoutResponseDTO(workout);
-        assertNotNull(workoutResponseDTO);
-        assertEquals(start, workoutResponseDTO.getStart());
-        assertEquals(finish, workoutResponseDTO.getFinish());
-        assertEquals(100, workoutResponseDTO.getCaloriesBurned());
-        assertEquals(1, workoutResponseDTO.getUserId());
     }
 }

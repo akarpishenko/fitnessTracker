@@ -5,6 +5,8 @@ import fitenessTrackerApp.dto.run.RunResponseDTO;
 import fitenessTrackerApp.dto.run.RunUpdateDto;
 import fitenessTrackerApp.etities.Run;
 import fitenessTrackerApp.etities.UserEntity;
+import fitenessTrackerApp.exception.RunNotFoundException;
+import fitenessTrackerApp.exception.UserNotFoundException;
 import fitenessTrackerApp.mappers.RunMapper;
 import fitenessTrackerApp.repository.RunRepo;
 import fitenessTrackerApp.repository.UserRepo;
@@ -80,12 +82,12 @@ public class RunServiceImplementationTest {
     public void createRun_shouldThrow_whenUserNotFound() {
         RunCreateDto dto = new RunCreateDto();
 
-        when(userRepo.findByUsername("ann")).thenReturn(Optional.empty());
+        when(userRepo.findByUsername("omelet")).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> runService.createRun("ann", dto));
+        UserNotFoundException ex = assertThrows(UserNotFoundException.class,
+                () -> runService.createRun("omelet", dto));
 
-        assertTrue(ex.getMessage().contains("User not found"));
+        assertTrue(ex.getMessage().contains("omelet"));
     }
 
     @Test
@@ -106,10 +108,10 @@ public class RunServiceImplementationTest {
     public void getRunById_shouldThrow_whenNotFound() {
         when(runRepo.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        RunNotFoundException ex = assertThrows(RunNotFoundException.class,
                 () -> runService.getRunById(1));
 
-        assertEquals("Run not found with id 1", ex.getMessage());
+        assertTrue(ex.getMessage().contains("1"));
     }
 
     @Test

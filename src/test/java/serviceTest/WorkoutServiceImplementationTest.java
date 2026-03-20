@@ -5,6 +5,7 @@ import fitenessTrackerApp.dto.workout.WorkoutResponseDTO;
 import fitenessTrackerApp.dto.workout.WorkoutUpdateDto;
 import fitenessTrackerApp.etities.UserEntity;
 import fitenessTrackerApp.etities.Workout;
+import fitenessTrackerApp.exception.UserNotFoundException;
 import fitenessTrackerApp.mappers.WorkoutMapper;
 import fitenessTrackerApp.repository.UserRepo;
 import fitenessTrackerApp.repository.WorkoutRepo;
@@ -76,10 +77,10 @@ public class WorkoutServiceImplementationTest {
 
         when(userRepo.findByUsername("ann")).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        UserNotFoundException ex = assertThrows(UserNotFoundException.class,
                 () -> workoutService.createWorkout("ann", dto));
 
-        assertTrue(ex.getMessage().contains("User not found"));
+        assertTrue(ex.getMessage().contains("ann"));
     }
 
     @Test

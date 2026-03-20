@@ -5,6 +5,8 @@ import fitenessTrackerApp.dto.exercise.ExerciseResponseDTO;
 import fitenessTrackerApp.dto.exercise.ExerciseUpdateDto;
 import fitenessTrackerApp.etities.Exercise;
 import fitenessTrackerApp.etities.Workout;
+import fitenessTrackerApp.exception.ExerciseNotFoundException;
+import fitenessTrackerApp.exception.WorkoutNotFoundException;
 import fitenessTrackerApp.mappers.ExerciseMapper;
 import fitenessTrackerApp.repository.ExerciseRepo;
 import fitenessTrackerApp.repository.WorkoutRepo;
@@ -205,12 +207,12 @@ public class ExerciseServiceImplementationTest {
         when(exerciseMapper.fromExerciseCreateDto(Mockito.any())).thenReturn(exercise);
         when(workoutRepo.findById(Mockito.any())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
+        WorkoutNotFoundException exception = assertThrows(
+                WorkoutNotFoundException.class,
                 () -> exerciseServiceImplementation.createExercise(1, dto)
         );
 
-        assertEquals("Workout not found with id 1", exception.getMessage());
+        assertEquals("Workout with id '1' not found.", exception.getMessage());
     }
 
     @Test
@@ -218,12 +220,12 @@ public class ExerciseServiceImplementationTest {
 
         when(exerciseRepo.findById(Mockito.any())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
+        ExerciseNotFoundException exception = assertThrows(
+                ExerciseNotFoundException.class,
                 () -> exerciseServiceImplementation.getExerciseById(1)
         );
 
-        assertEquals("Exercise not found with id 1", exception.getMessage());
+        assertEquals("Exercise with id '1' not found.", exception.getMessage());
     }
 
     @Test

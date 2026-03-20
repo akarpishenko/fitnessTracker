@@ -3,6 +3,9 @@ package serviceTest;
 import fitenessTrackerApp.dto.user.UserResponseDTO;
 import fitenessTrackerApp.dto.user.UserUpdateDto;
 import fitenessTrackerApp.etities.UserEntity;
+import fitenessTrackerApp.exception.EmailAlreadyInUseException;
+import fitenessTrackerApp.exception.UserNotFoundException;
+import fitenessTrackerApp.exception.UsernameAlreadyInUseException;
 import fitenessTrackerApp.mappers.UserMapper;
 import fitenessTrackerApp.repository.UserRepo;
 import fitenessTrackerApp.service.UserServiceImplementation;
@@ -54,10 +57,10 @@ public class UserEntityServiceImplementationTest {
     public void getUserByUsername_shouldThrow_whenNotFound() {
         when(userRepo.findByUsername("ann")).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        UserNotFoundException ex = assertThrows(UserNotFoundException.class,
                 () -> userService.getUserByUsername("ann"));
 
-        assertTrue(ex.getMessage().contains("User not found"));
+        assertTrue(ex.getMessage().contains("ann"));
     }
 
     @Test
@@ -100,10 +103,10 @@ public class UserEntityServiceImplementationTest {
     public void updateUser_shouldThrow_whenUserNotFound() {
         when(userRepo.findByUsername("ann")).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        UserNotFoundException ex = assertThrows(UserNotFoundException.class,
                 () -> userService.updateUser("ann", new UserUpdateDto()));
 
-        assertEquals("User not found", ex.getMessage());
+        assertEquals("User with username 'ann' not found.", ex.getMessage());
     }
 
     @Test
@@ -117,10 +120,10 @@ public class UserEntityServiceImplementationTest {
         when(userRepo.findByUsername("ann")).thenReturn(Optional.of(user));
         when(userRepo.existsByEmailAndUsernameNot("test@mail.com", "ann")).thenReturn(true);
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        EmailAlreadyInUseException ex = assertThrows(EmailAlreadyInUseException.class,
                 () -> userService.updateUser("ann", dto));
 
-        assertEquals("Email already in use", ex.getMessage());
+        assertEquals("Email already in use: test@mail.com", ex.getMessage());
     }
 
     @Test
@@ -136,10 +139,10 @@ public class UserEntityServiceImplementationTest {
         when(userRepo.existsByUsernameAndEmailNot("newUsername", "ann@mail.com"))
                 .thenReturn(true);
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        UsernameAlreadyInUseException ex = assertThrows(UsernameAlreadyInUseException.class,
                 () -> userService.updateUser("ann", dto));
 
-        assertEquals("Username already in use", ex.getMessage());
+        assertEquals("Username already in use: newUsername", ex.getMessage());
     }
 
     @Test
